@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 8
+names: ['Broken part', 'Corrosion', 'Cracked', 'Dent', 'Flaking', 'Missing part', 'Paint chip', 'Scratch']
+
+roboflow:
+  workspace: gabriel-cesar
+  project: damage-car-lh7s3-pdv1k
+  version: 1
+  license: CC BY 4.0
+  url: https://app.roboflow.com/gabriel-cesar/damage-car-lh7s3-pdv1k/1
