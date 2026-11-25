@@ -29,30 +29,48 @@ DESCONTO_MAXIMO = 0.40
 
 
 @st.cache_data
+
 def carregar_base_fipe(caminho_parquet: Path) -> pd.DataFrame:
-  df = pd.read_parquet(caminho_parquet)
+  colunas_necessarias = [
+      "tipo_veiculo",
+      "nome_marca",
+      "nome_modelo",
+      "ano_modelo",
+      "nome_combustivel",
+      "valor_formatado",
+  ]
+  df = pd.read_parquet(caminho_parquet, columns=colunas_necessarias)
+
   df_carros = df[
       df["tipo_veiculo"].astype(str).str.lower().str.strip() == "carro"
-  ].copy()
+  ]
+  del df
 
-  df_carros["preco_num"] = (
+  preco_limpo = (
       df_carros["valor_formatado"]
       .astype(str)
       .str.replace("R$", "", regex=False)
       .str.replace(".", "", regex=False)
       .str.replace(",", ".", regex=False)
       .str.strip()
-      .astype(float)
   )
 
-  colunas_uteis = [
+  df_model = df_carros[[
+      "nome_marca",
+      "nome_modelo",
+      "ano_modelo",
+      "nome_combustivel",
+  ]].copy()
+  del df_carros
+
+  df_model["preco_num"] = pd.to_numeric(preco_limpo, errors="coerce")
+  df_model = df_model.dropna(subset=[
       "nome_marca",
       "nome_modelo",
       "ano_modelo",
       "nome_combustivel",
       "preco_num",
-  ]
-  df_model = df_carros.dropna(subset=colunas_uteis).copy()
+  ])
 
   df_model["eh_1_0"] = (
       df_model["nome_modelo"]
@@ -67,6 +85,7 @@ def carregar_base_fipe(caminho_parquet: Path) -> pd.DataFrame:
   df_model["combustivel_cod"] = (
       df_model["nome_combustivel"].astype("category").cat.codes
   )
+
   return df_model
 
 
