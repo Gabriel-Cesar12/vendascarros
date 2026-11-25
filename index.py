@@ -138,7 +138,7 @@ st.markdown(
         }
     </style>
     <div class="main-header">
-        <h1 style="margin:0; font-size: 1.8rem;">🚗 Avaliador Inteligente de Veículos (FIPE + YOLOv8)</h1>
+        <h1 style="margin:0; font-size: 1.8rem;"> Avaliador Inteligente de Veículos (FIPE + YOLOv8)</h1>
         <p style="margin:0.3rem 0 0 0; color:#9ca3af;">
             Estimativa de tabela FIPE com Machine Learning e desconto automático por avarias detectadas na foto.
         </p>
@@ -169,7 +169,7 @@ except Exception as e:
 col_esq, col_dir = st.columns([1, 1.35], gap="large")
 
 with col_esq:
-  st.subheader("📋 Dados do Veículo")
+  st.subheader(" Dados do Veículo")
   marcas = sorted(df_model["nome_marca"].dropna().unique().tolist())
   marca_escolhida = st.selectbox("Marca", marcas)
 
@@ -193,14 +193,14 @@ with col_esq:
       "Sensibilidade da IA (confiança)", 0.05, 0.80, 0.15, 0.05
   )
 
-  st.subheader("📸 Foto para Inspeção de Avarias")
+  st.subheader(" Foto para Inspeção de Avarias")
   arquivo_foto = st.file_uploader(
       "Clique ou arraste a foto do carro",
       type=["jpg", "jpeg", "png", "webp"],
   )
 
   calcular_btn = st.button(
-      "Calcular Preço estimado de Venda", type="primary", use_container_width=True
+      "Calcular Preço estimado de Venda", type="primary", width="stretch"   
   )
 
 with col_dir:
@@ -318,5 +318,5 @@ with col_dir:
           st.image(
               imagem_anotada_rgb,
               caption="Inspeção visual do YOLOv8",
-              use_container_width=True,
+              width="stretch",
           )
