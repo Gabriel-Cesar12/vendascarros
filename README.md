@@ -1,5 +1,8 @@
 # vendascarros
 
+Aplicativo Streamlit para estimar o valor de um veiculo com dados FIPE,
+Random Forest e deteccao de avarias com YOLOv8.
+
 ## Ambiente local (Windows / PowerShell)
 
 Use Python 3.11 ou superior. Crie o ambiente virtual:
@@ -24,3 +27,9 @@ A aplicação lê `fipex-prices-latest.parquet`, `modelo_fipe_rf.joblib` e os pe
 YOLO em `runs/detect/train-9/weights/best.pt`, relativos à pasta do projeto.
 O notebook `analisefipe.ipynb` também requer as dependências listadas em
 `requirements.txt`.
+
+## Hospedagem
+
+A aplicacao deve ser publicada no Streamlit Community Cloud, nao diretamente
+na Vercel. Streamlit precisa de um processo Python persistente e de WebSockets.
+Consulte o procedimento em [docs/DEPLOY.md](docs/DEPLOY.md).

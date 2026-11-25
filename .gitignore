@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Test and runtime outputs
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+upload_temp/
+*.log
+
+# Streamlit
+.streamlit/secrets.toml
