@@ -4,4 +4,12 @@ scikit-learn
 joblib
 ultralytics
 pyarrow==24.0.0
+opencv-python
+# Roboflow requires the headless distribution; Ultralytics requires opencv-python.
 opencv-python-headless
+Pillow
+notebook
+jupyter
+ipykernel
+ipywidgets
+roboflow
