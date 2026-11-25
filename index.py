@@ -1,3 +1,4 @@
+import gc
 from pathlib import Path
 import joblib
 import pandas as pd
@@ -154,9 +155,16 @@ if not YOLO_PATH.exists():
   st.error(f"Peso do YOLO não encontrado: {YOLO_PATH}")
   st.stop()
 
-with st.spinner("Carregando base FIPE e modelos de IA..."):
-  df_model = carregar_base_fipe(PARQUET_PATH)
-  modelo_fipe, modelo_yolo = carregar_modelos(df_model)
+try:
+  with st.spinner("Carregando base FIPE e modelos de IA..."):
+    df_model = carregar_base_fipe(PARQUET_PATH)
+    gc.collect()
+    modelo_fipe, modelo_yolo = carregar_modelos(df_model)
+    gc.collect()
+except Exception as e:
+  st.error("Erro ao carregar base ou modelos:")
+  st.exception(e)
+  st.stop()
 
 col_esq, col_dir = st.columns([1, 1.35], gap="large")
 
@@ -219,22 +227,28 @@ with col_dir:
         eh_1_0 = int(any(veiculo_filtrado["eh_1_0"]))
 
         entrada = pd.DataFrame([{
-            "marca_cod": cod_marca,
-            "modelo_cod": cod_modelo,
-            "ano_modelo": int(ano_escolhido),
-            "combustivel_cod": cod_combustivel,
-            "eh_1_0": eh_1_0,
-        }])
+                    "marca_cod": cod_marca,
+                    "modelo_cod": cod_modelo,
+                    "ano_modelo": int(ano_escolhido),
+                    "combustivel_cod": cod_combustivel,
+                    "eh_1_0": eh_1_0,
+                }])
 
-        with st.spinner("Calculando valor FIPE e analisando avarias na foto..."):
-          fipe_prevista = float(modelo_fipe.predict(entrada)[0])
-          resultados = modelo_yolo.predict(
-              source=str(caminho_foto),
-              conf=confianca,
-              imgsz=320,
-              save=False,
-              verbose=False,
-          )
+        try:
+                    with st.spinner("Calculando valor FIPE e analisando avarias na foto..."):
+                        fipe_prevista = float(modelo_fipe.predict(entrada)[0])
+                        resultados = modelo_yolo.predict(
+                        source=str(caminho_foto),
+                        conf=confianca,
+                        imgsz=320,
+                        device="cpu",
+                        save=False,
+                        verbose=False,
+                    )
+        except Exception as e:
+                    st.error("Deu erro na hora de calcular / rodar a IA:")
+                    st.exception(e)
+                    st.stop()
 
         contagem = {}
         desconto_bruto = 0.0
@@ -247,6 +261,9 @@ with col_dir:
             nome_classe = modelo_yolo.names[cls_id]
             contagem[nome_classe] = contagem.get(nome_classe, 0) + 1
             desconto_bruto += PESOS_GRAVIDADE.get(nome_classe, 0.02)
+
+        del resultados
+        gc.collect()
 
         desconto_final = min(desconto_bruto, DESCONTO_MAXIMO)
         sugestao_anuncio = fipe_prevista * (1.0 - desconto_final)
