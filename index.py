@@ -13,7 +13,7 @@ st.set_page_config(
 )
 
 BASE_DIR = Path(__file__).resolve().parent
-PARQUET_PATH = BASE_DIR / "fipex-prices-latest.parquet"
+PARQUET_PATH = BASE_DIR / "fipex-carros-otimizado.parquet"
 YOLO_PATH = BASE_DIR / "runs" / "detect" / "train-9" / "weights" / "best.pt"
 MODELO_PATH = BASE_DIR / "modelo_fipe_rf.joblib"
 UPLOAD_DIR = BASE_DIR / "upload_temp"
@@ -30,63 +30,39 @@ DESCONTO_MAXIMO = 0.40
 
 
 @st.cache_data
-
 def carregar_base_fipe(caminho_parquet: Path) -> pd.DataFrame:
   colunas_necessarias = [
-      "tipo_veiculo",
-      "nome_marca",
-      "nome_modelo",
-      "ano_modelo",
-      "nome_combustivel",
-      "valor_formatado",
-  ]
-  df = pd.read_parquet(caminho_parquet, columns=colunas_necessarias)
-
-  df_carros = df[
-      df["tipo_veiculo"].astype(str).str.lower().str.strip() == "carro"
-  ]
-  del df
-
-  preco_limpo = (
-      df_carros["valor_formatado"]
-      .astype(str)
-      .str.replace("R$", "", regex=False)
-      .str.replace(".", "", regex=False)
-      .str.replace(",", ".", regex=False)
-      .str.strip()
-  )
-
-  df_model = df_carros[[
-      "nome_marca",
-      "nome_modelo",
-      "ano_modelo",
-      "nome_combustivel",
-  ]].copy()
-  del df_carros
-
-  df_model["preco_num"] = pd.to_numeric(preco_limpo, errors="coerce")
-  df_model = df_model.dropna(subset=[
       "nome_marca",
       "nome_modelo",
       "ano_modelo",
       "nome_combustivel",
       "preco_num",
-  ])
+  ]
+  df_model = pd.read_parquet(caminho_parquet, columns=colunas_necessarias)
+
+  df_model = df_model.dropna(subset=colunas_necessarias).copy()
+  df_model["ano_modelo"] = df_model["ano_modelo"].astype("int16")
+  df_model["preco_num"] = df_model["preco_num"].astype("float32")
 
   df_model["eh_1_0"] = (
       df_model["nome_modelo"]
       .astype(str)
       .str.lower()
       .str.contains(r"1[.,]0", regex=True)
-      .astype(int)
+      .astype("int8")
   )
 
-  df_model["marca_cod"] = df_model["nome_marca"].astype("category").cat.codes
-  df_model["modelo_cod"] = df_model["nome_modelo"].astype("category").cat.codes
+  df_model["marca_cod"] = (
+      df_model["nome_marca"].astype("category").cat.codes.astype("int32")
+  )
+  df_model["modelo_cod"] = (
+      df_model["nome_modelo"].astype("category").cat.codes.astype("int32")
+  )
   df_model["combustivel_cod"] = (
-      df_model["nome_combustivel"].astype("category").cat.codes
+      df_model["nome_combustivel"].astype("category").cat.codes.astype("int32")
   )
 
+  gc.collect()
   return df_model
 
 
