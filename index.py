@@ -169,39 +169,37 @@ except Exception as e:
 col_esq, col_dir = st.columns([1, 1.35], gap="large")
 
 with col_esq:
-  st.subheader(" Dados do Veículo")
-  marcas = sorted(df_model["nome_marca"].dropna().unique().tolist())
-  marca_escolhida = st.selectbox("Marca", marcas)
+  with st.form("form_avaliacao"):
+    st.subheader("📋 Dados do Veículo")
+    marcas = sorted(df_model["nome_marca"].dropna().unique().tolist())
+    marca_escolhida = st.selectbox("Marca", marcas)
 
-  modelos_da_marca = sorted(
-      df_model[df_model["nome_marca"] == marca_escolhida]["nome_modelo"]
-      .dropna()
-      .unique()
-      .tolist()
-  )
-  modelo_escolhido = st.selectbox("Modelo", modelos_da_marca)
-
-  c1, c2 = st.columns(2)
-  with c1:
-    ano_escolhido = st.number_input(
-        "Ano do Modelo", min_value=1980, max_value=2027, value=2020, step=1
+    modelos_disponiveis = sorted(
+        df_model["nome_modelo"].dropna().unique().tolist()
     )
-  with c2:
-    cambio_escolhido = st.selectbox("Câmbio", ["Automático", "Manual"])
+    modelo_escolhido = st.selectbox("Modelo", modelos_disponiveis)
 
-  confianca = st.slider(
-      "Sensibilidade da IA (confiança)", 0.05, 0.80, 0.15, 0.05
-  )
+    c1, c2 = st.columns(2)
+    with c1:
+      ano_escolhido = st.number_input(
+          "Ano do Modelo", min_value=1980, max_value=2027, value=2020, step=1
+      )
+    with c2:
+      cambio_escolhido = st.selectbox("Câmbio", ["Automático", "Manual"])
 
-  st.subheader(" Foto para Inspeção de Avarias")
-  arquivo_foto = st.file_uploader(
-      "Clique ou arraste a foto do carro",
-      type=["jpg", "jpeg", "png", "webp"],
-  )
+    confianca = st.slider(
+        "Sensibilidade da IA (confiança)", 0.05, 0.80, 0.15, 0.05
+    )
 
-  calcular_btn = st.button(
-      "Calcular Preço estimado de Venda", type="primary", width="stretch"   
-  )
+    st.subheader("📸 Foto para Inspeção de Avarias")
+    arquivo_foto = st.file_uploader(
+        "Clique ou arraste a foto do carro",
+        type=["jpg", "jpeg", "png", "webp"],
+    )
+
+    calcular_btn = st.form_submit_button(
+        "Calcular Preço estimado de Venda", type="primary", width="stretch"
+    )
 
 with col_dir:
   st.subheader("Resultado da Avaliação")
